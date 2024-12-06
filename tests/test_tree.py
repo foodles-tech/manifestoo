@@ -61,3 +61,26 @@ def test_integration_inverse(tmp_path: Path):
                     └── a ⬆
         """
     )
+
+
+def test_integration_unfold_seen_addons(tmp_path: Path):
+    _init_test_addons(tmp_path)
+    runner = CliRunner()
+    result = runner.invoke(
+        app,
+        ["--select=a", f"--addons-path={tmp_path}", "tree", "--unfold-seen-addons"],
+        catch_exceptions=False,
+    )
+    assert not result.exception
+    assert result.exit_code == 0, result.stderr
+    assert result.stdout == textwrap.dedent(
+        """\
+            a (13.0.1.0.0)
+            ├── b (no version)
+            │   └── mail (✘ not installed)
+            └── c (no version)
+                ├── account (13.0+c)
+                └── b (no version)
+                    └── mail (✘ not installed)
+        """
+    )
