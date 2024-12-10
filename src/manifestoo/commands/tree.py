@@ -31,7 +31,11 @@ class Node:
         return addon_name
 
     def print(
-        self, odoo_series: OdooSeries, fold_core_addons: bool, inverse: bool
+        self,
+        odoo_series: OdooSeries,
+        fold_core_addons: bool,
+        inverse: bool,
+        unfold_seen_addons: bool,
     ) -> None:
         seen: Set[Node] = set()
 
@@ -42,7 +46,9 @@ class Node:
             TEE = "├── "
             LAST = "└── "
             typer.echo(f"{''.join(indent)}{node.addon_name}", nl=False)
-            if node in seen:
+            # When unfold_seen_addons is True, there will be an infinite recursion
+            # in the presence of a cyclic dependency
+            if not unfold_seen_addons and node in seen:
                 typer.secho(" ⬆", dim=True)
                 return
             typer.secho(f" ({node.sversion(odoo_series)})", dim=True)
@@ -86,6 +92,7 @@ def tree_command(
     odoo_series: OdooSeries,
     fold_core_addons: bool,
     inverse: bool,
+    unfold_seen_addons: bool,
 ) -> None:
     nodes: Dict[NodeKey, Node] = {}
 
@@ -117,4 +124,4 @@ def tree_command(
         root_nodes = [node for node in nodes.values() if not node.children]
     root_nodes = sorted(root_nodes, key=lambda n: n.addon_name)
     for root_node in root_nodes:
-        root_node.print(odoo_series, fold_core_addons, inverse)
+        root_node.print(odoo_series, fold_core_addons, inverse, unfold_seen_addons)

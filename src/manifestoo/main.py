@@ -501,6 +501,12 @@ def tree(
         help="Display the tree in inverse mode. Not available in interactive mode.",
         show_default=False,
     ),
+    unfold_seen_addons: bool = typer.Option(
+        False,
+        "--unfold-seen-addons",
+        help="Expand dependencies that are already present in the tree.",
+        show_default=False,
+    ),
 ) -> None:
     """Print the dependency tree of selected addons."""
     main_options: MainOptions = ctx.obj
@@ -524,4 +530,5 @@ def tree(
             main_options.odoo_series,
             fold_core_addons,
             inverse,
+            unfold_seen_addons,
         )
